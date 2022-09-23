@@ -1,7 +1,9 @@
 package ru.yandex.practicum.kanban.main;
 
-import ru.yandex.practicum.kanban.task.*;
+import ru.yandex.practicum.kanban.manager.Managers;
 import ru.yandex.practicum.kanban.manager.TaskManager;
+import ru.yandex.practicum.kanban.task.*;
+import ru.yandex.practicum.kanban.manager.InMemoryTaskManager;
 
 public class Main {
 
@@ -11,39 +13,37 @@ public class Main {
 
     private static void printTestCases() {
         System.out.println("Поехали!");
-        TaskManager manager = new TaskManager();
-        //Создаем две задачи
-        Task task1 = manager.createTask(new Task("name1", "desc1"));
-        Task task2 = manager.createTask(new Task("name2", "desc2"));
+        TaskManager manager = new Managers().getDefault();
+
+        //Тестирование истории просмотров
+
+        Task task4 = manager.createTask(new Task("name1", "desc1"));
+        Task task5 = manager.createTask(new Task("name2", "desc2"));
         //Создаем пустой эпик
-        Epic epic1 = manager.createEpic(new Epic("name", "desc"));
-        Epic epic2 = manager.createEpic(new Epic("name2", "desc2"));
+        Epic epic6 = manager.createEpic(new Epic("name", "desc"));
+        Epic epic7 = manager.createEpic(new Epic("name2", "desc2"));
         //Создаем подзадачи
-        SubTask subTask1 = manager.createSubTask(new SubTask("name1", "desc1", epic1.getUuid()));
-        SubTask subTask2 = manager.createSubTask(new SubTask("name1", "desc1", epic1.getUuid()));
-        SubTask subTask3 = manager.createSubTask(new SubTask("name1", "desc1", epic2.getUuid()));
+        SubTask subTask8 = manager.createSubTask(new SubTask("name1", "desc1", epic6.getUuid()));
+        SubTask subTask9 = manager.createSubTask(new SubTask("name1", "desc1", epic6.getUuid()));
+        SubTask subTask10 = manager.createSubTask(new SubTask("name1", "desc1", epic7.getUuid()));
 
-        //Выводим созданные задачи
-        System.out.println(manager.getEpics());
-        System.out.println(manager.getTasks());
-        System.out.println(manager.getSubTasks());
+        System.out.println("История");
+        //Просматриваем созданные таски
 
-        //Обновляем subTasks. Проверяем изменение name, description и status
-        manager.update(subTask1.getUuid(), new SubTask(subTask1.getUuid(), "nameUpd", "descUpd", "NEW", subTask1.getEpicUuid()));
-        manager.update(subTask2.getUuid(), new SubTask(subTask2.getUuid(), "nameUpd2", "descUpd2", "DONE", subTask2.getEpicUuid()));
-        manager.update(subTask3.getUuid(), new SubTask(subTask3.getUuid(), "nameUpd3", "descUpd3", "DONE", subTask3.getEpicUuid()));
-        manager.update(task1.getUuid(), new Task(task1.getUuid(), "nameUpd3", "descUpd3", "DONE"));
+        manager.getTaskByUuid(task4.getUuid());
+        manager.getTaskByUuid(task4.getUuid());
+        manager.getTaskByUuid(task5.getUuid());
 
-        System.out.println(manager.getEpics());
-        System.out.println(manager.getTasks());
-        System.out.println(manager.getSubTasks());
+        manager.getEpicByUuid(epic7.getUuid());
+        manager.getEpicByUuid(epic7.getUuid());
+        manager.getEpicByUuid(epic7.getUuid());
+        manager.getEpicByUuid(epic6.getUuid());
 
-        //Удаляем одну из двух задач в эпике и полность один эпик
-        manager.deleteSubTask(subTask1.getUuid(), subTask1.getEpicUuid());
-        manager.deleteEpic(epic2.getUuid());
+        manager.getSubTaskByUuid(subTask8.getUuid());
+        manager.getSubTaskByUuid(subTask9.getUuid());
+        manager.getSubTaskByUuid(subTask10.getUuid());
+        manager.getSubTaskByUuid(subTask8.getUuid());
 
-        System.out.println(manager.getEpics());
-        System.out.println(manager.getTasks());
-        System.out.println(manager.getSubTasks());
+        System.out.println(manager.getHistory());
     }
 }
