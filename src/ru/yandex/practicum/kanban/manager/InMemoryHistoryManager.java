@@ -1,23 +1,21 @@
 package ru.yandex.practicum.kanban.manager;
 
-import ru.yandex.practicum.kanban.task.Task;
-
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class InMemoryHistoryManager implements HistoryManager{
-    private ArrayList<Task> taskHistory = new ArrayList<>();
+    private LinkedList<Object> taskHistory = new LinkedList<>();
 
     @Override
-    public void add(Task task) {
+    public void add(Object obj) {
         if(taskHistory.size() >= 9) {
             taskHistory.remove(0);
         } else {
-            taskHistory.add(task);
+            taskHistory.add(obj);
         }
     }
 
     @Override
-    public ArrayList<Task> getHistory() {
+    public LinkedList<Object> getHistory() {
         return this.taskHistory;
     }
 }

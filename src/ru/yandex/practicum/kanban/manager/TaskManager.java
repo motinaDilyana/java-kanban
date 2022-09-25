@@ -6,8 +6,9 @@ import ru.yandex.practicum.kanban.task.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 
- public interface TaskManager {
+public interface TaskManager {
 
      Task createTask(Task task);
 
@@ -47,5 +48,5 @@ import java.util.HashMap;
 
      void update(Integer uuid, SubTask subTask);
 
-     ArrayList<Task> getHistory();
+     LinkedList<Object> getHistory();
 }

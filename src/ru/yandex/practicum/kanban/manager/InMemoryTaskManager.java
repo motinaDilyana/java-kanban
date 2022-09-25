@@ -4,6 +4,7 @@ import ru.yandex.practicum.kanban.task.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
@@ -186,7 +187,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
 
-    public ArrayList<Task> getHistory() {
+    public LinkedList<Object> getHistory() {
         return historyManager.getHistory();
     }
 }
