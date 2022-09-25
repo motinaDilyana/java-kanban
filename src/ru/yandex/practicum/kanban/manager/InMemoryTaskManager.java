@@ -1,9 +1,6 @@
 package ru.yandex.practicum.kanban.manager;
 
-import ru.yandex.practicum.kanban.task.Epic;
-import ru.yandex.practicum.kanban.task.Statuses;
-import ru.yandex.practicum.kanban.task.SubTask;
-import ru.yandex.practicum.kanban.task.Task;
+import ru.yandex.practicum.kanban.task.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +12,7 @@ public class InMemoryTaskManager implements TaskManager {
     private final HashMap<Integer, Task> tasks = new HashMap<>();
     private final HashMap<Integer, SubTask> subTasks = new HashMap<>();
     private final HashMap<Integer, Epic> epics = new HashMap<>();
-    private HistoryManager historyManager = new InMemoryHistoryManager();
+    private HistoryManager historyManager = Managers.getDefaultHistory();
 
     @Override
     public Task createTask(Task task) {

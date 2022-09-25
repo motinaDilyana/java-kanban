@@ -3,7 +3,6 @@ package ru.yandex.practicum.kanban.main;
 import ru.yandex.practicum.kanban.manager.Managers;
 import ru.yandex.practicum.kanban.manager.TaskManager;
 import ru.yandex.practicum.kanban.task.*;
-import ru.yandex.practicum.kanban.manager.InMemoryTaskManager;
 
 public class Main {
 
@@ -13,7 +12,7 @@ public class Main {
 
     private static void printTestCases() {
         System.out.println("Поехали!");
-        TaskManager manager = new Managers().getDefault();
+        TaskManager manager = Managers.getDefault();
 
         //Тестирование истории просмотров
 
