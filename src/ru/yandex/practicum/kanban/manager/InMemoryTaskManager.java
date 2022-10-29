@@ -4,7 +4,6 @@ import ru.yandex.practicum.kanban.task.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
@@ -40,6 +39,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteTask(Integer uuid) {
+        historyManager.remove(uuid);
         tasks.remove(uuid);
     }
 
@@ -73,11 +73,14 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteEpic(Integer uuid) {
-        for (Map.Entry<Integer, SubTask> entry : subTasks.entrySet()) {
+        Map<Integer, SubTask> copyMap = new HashMap<>(subTasks);
+        for (Map.Entry<Integer, SubTask> entry : copyMap.entrySet()) {
             if (entry.getValue().getEpicUuid().equals(uuid)) {
+                historyManager.remove(entry.getKey());
                 subTasks.remove(entry.getKey());
             }
         }
+        historyManager.remove(uuid);
         epics.remove(uuid);
     }
 
@@ -176,6 +179,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteSubTask(Integer uuid, Integer epicUuid) {
         subTasks.remove(uuid);
+        historyManager.remove(uuid);
         update(epicUuid, epics.get(epicUuid));
     }
 
@@ -187,7 +191,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
 
-    public LinkedList<Object> getHistory() {
+    public ArrayList<Task> getHistory() {
         return historyManager.getHistory();
     }
 }

@@ -48,5 +48,5 @@ public interface TaskManager {
 
      void update(Integer uuid, SubTask subTask);
 
-     LinkedList<Object> getHistory();
+     ArrayList<Task> getHistory();
 }
