@@ -64,7 +64,7 @@ public class Main {
         System.out.println("История после удаления: " + manager.getHistory());
 
         //удаляем эпик со всеми подзадачами
-        manager.deleteEpic(null);
+        manager.deleteEpic(epic6.getUuid());
 
         //Проверяем историю после удаления эпика
         System.out.println("История после удаления эпика: " + manager.getHistory());
