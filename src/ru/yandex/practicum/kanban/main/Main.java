@@ -33,7 +33,7 @@ public class Main {
 
         System.out.println("История");
         //Просматриваем созданные таски
-        manager.getTaskByUuid(666666);
+        manager.getTaskByUuid(task4.getUuid());
         manager.getTaskByUuid(task5.getUuid());
         manager.getTaskByUuid(task4.getUuid());
         manager.getTaskByUuid(task4.getUuid());
