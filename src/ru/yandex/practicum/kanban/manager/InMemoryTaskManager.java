@@ -1,5 +1,7 @@
 package ru.yandex.practicum.kanban.manager;
 
+import ru.yandex.practicum.kanban.manager.exceptions.NullTaskException;
+import ru.yandex.practicum.kanban.manager.exceptions.TaskNotFoundException;
 import ru.yandex.practicum.kanban.task.*;
 
 import java.util.ArrayList;
@@ -12,10 +14,13 @@ public class InMemoryTaskManager implements TaskManager {
     private final HashMap<Integer, Task> tasks = new HashMap<>();
     private final HashMap<Integer, SubTask> subTasks = new HashMap<>();
     private final HashMap<Integer, Epic> epics = new HashMap<>();
-    private HistoryManager historyManager = Managers.getDefaultHistory();
+    private final HistoryManager historyManager = Managers.getDefaultHistory();
 
     @Override
-    public Task createTask(Task task) {
+    public Task createTask(Task task) throws NullTaskException {
+        if(task == null) {
+            throw new NullTaskException("Task не может быть пустым.");
+        }
         task = new Task(uuid++, task.getName(), task.getDescription(), Statuses.NEW.toString());
         tasks.put(task.getUuid(), task);
         return task;
@@ -23,8 +28,12 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task getTaskByUuid(Integer uuid) {
-        historyManager.add(tasks.get(uuid));
-        return tasks.get(uuid);
+        final Task task = tasks.get(uuid);
+        if(task == null) {
+            throw new TaskNotFoundException("Task с uuid "+ uuid + " не найден");
+        }
+        historyManager.add(task);
+        return task;
     }
 
     @Override
@@ -39,6 +48,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteTask(Integer uuid) {
+        Task task = tasks.get(uuid);
+        if(task == null) {
+            throw new TaskNotFoundException("Task с uuid "+ uuid + " не найден");
+        }
         historyManager.remove(uuid);
         tasks.remove(uuid);
     }
@@ -53,7 +66,10 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Epic createEpic(Epic epic) {
+    public Epic createEpic(Epic epic) throws NullTaskException {
+        if(epic == null) {
+            throw new NullTaskException("Epic не может быть пустым.");
+        }
         epic = new Epic(uuid++, epic.getName(), epic.getDescription(), Statuses.NEW.toString());
         epics.put(epic.getUuid(), epic);
         return epic;
@@ -61,8 +77,14 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Epic getEpicByUuid(Integer uuid) {
-        historyManager.add(epics.get(uuid));
-        return epics.get(uuid);
+        final Epic epic = epics.get(uuid);
+
+        if(epic == null) {
+            throw new TaskNotFoundException("Epic с uuid "+ uuid + " не найден");
+        }
+
+        historyManager.add(epic);
+        return epic;
     }
 
     @Override
@@ -102,8 +124,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     private String updateStatus(Epic epic) {
         ArrayList<Integer> epicSubTaskUuids = epic.getSubTaskUuids().isEmpty() ? new ArrayList<>() : epic.getSubTaskUuids();
-        Integer doneCounter = 0;
-        Integer newCounter = 0;
+        int doneCounter = 0;
+        int newCounter = 0;
 
         String epicStatus = Statuses.NEW.toString();
 
@@ -155,7 +177,10 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public SubTask createSubTask(SubTask subTask) {
+    public SubTask createSubTask(SubTask subTask) throws NullTaskException{
+        if(subTask == null) {
+            throw new NullTaskException("SubTask не может быть пустым.");
+        }
         subTask = new SubTask(uuid++, subTask.getName(), subTask.getDescription(), Statuses.NEW.toString(), subTask.getEpicUuid());
         subTasks.put(subTask.getUuid(), subTask);
         update(subTask.getEpicUuid(), epics.get(subTask.getEpicUuid()));
@@ -164,8 +189,12 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public SubTask getSubTaskByUuid(Integer uuid) {
-        historyManager.add(subTasks.get(uuid));
-        return subTasks.get(uuid);
+        final SubTask subTask = subTasks.get(uuid);
+        if (subTask == null) {
+            throw new TaskNotFoundException("SubTask с uuid: " + uuid + " не существует");
+        }
+        historyManager.add(subTask);
+        return subTask;
     }
 
     @Override
@@ -190,7 +219,6 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-
     public ArrayList<Task> getHistory() {
         return historyManager.getHistory();
     }

@@ -6,7 +6,6 @@ import ru.yandex.practicum.kanban.task.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 
 public interface TaskManager {
 
@@ -26,7 +25,7 @@ public interface TaskManager {
 
      Epic getEpicByUuid(Integer uuid);
 
-     void deleteEpics() ;
+     void deleteEpics();
 
      void deleteEpic(Integer uuid);
 
@@ -36,13 +35,13 @@ public interface TaskManager {
 
      void update(Integer uuid, Epic epic);
 
-     ArrayList<SubTask> getSubTasks() ;
+     ArrayList<SubTask> getSubTasks();
 
      SubTask createSubTask(SubTask subTask);
 
      SubTask getSubTaskByUuid(Integer uuid);
 
-     void deleteSubTasks() ;
+     void deleteSubTasks();
 
      void deleteSubTask(Integer uuid, Integer epicUuid);
 

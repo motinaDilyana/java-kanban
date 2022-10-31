@@ -1,7 +1,5 @@
 package ru.yandex.practicum.kanban.manager.util;
 
-import ru.yandex.practicum.kanban.task.Task;
-
 import java.util.Objects;
 
 public class Node<E> {

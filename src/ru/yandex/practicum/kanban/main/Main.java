@@ -2,12 +2,18 @@ package ru.yandex.practicum.kanban.main;
 
 import ru.yandex.practicum.kanban.manager.Managers;
 import ru.yandex.practicum.kanban.manager.TaskManager;
+import ru.yandex.practicum.kanban.manager.exceptions.NullTaskException;
+import ru.yandex.practicum.kanban.manager.exceptions.TaskNotFoundException;
 import ru.yandex.practicum.kanban.task.*;
 
 public class Main {
 
     public static void main(String[] args) {
-        printTestCases();
+        try {
+            printTestCases();
+        } catch (NullTaskException | TaskNotFoundException e) {
+            System.out.println("Ошибка: " + e.getMessage());
+        }
     }
 
     private static void printTestCases() {
@@ -58,7 +64,7 @@ public class Main {
         System.out.println("История после удаления: " + manager.getHistory());
 
         //удаляем эпик со всеми подзадачами
-        manager.deleteEpic(epic6.getUuid());
+        manager.deleteEpic(null);
 
         //Проверяем историю после удаления эпика
         System.out.println("История после удаления эпика: " + manager.getHistory());

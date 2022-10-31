@@ -3,8 +3,7 @@ package ru.yandex.practicum.kanban.task;
 import java.util.Objects;
 
 public class SubTask extends Task {
-    private Integer epicUuid;
-
+    private final Integer epicUuid;
     public SubTask(String name, String description, Integer epicUuid) {
         super(name, description);
         this.epicUuid = epicUuid;
