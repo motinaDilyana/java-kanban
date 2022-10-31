@@ -1,5 +1,6 @@
 package ru.yandex.practicum.kanban.manager;
 
+import ru.yandex.practicum.kanban.manager.exceptions.NullTaskException;
 import ru.yandex.practicum.kanban.manager.util.CustomLinkedList;
 import ru.yandex.practicum.kanban.manager.util.Node;
 import ru.yandex.practicum.kanban.task.Task;
@@ -7,15 +8,19 @@ import ru.yandex.practicum.kanban.task.Task;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class InMemoryHistoryManager<T> implements HistoryManager{
     private final CustomLinkedList<Task> taskHistory = new CustomLinkedList<>();
     private final Map<Integer, Node<T>> taskLocation = new HashMap<>();
 
     @Override
-    public void add(Task task) {
+    public void add(Task task) throws NullTaskException{
+            if (Objects.isNull(task)) {
+                throw new NullTaskException("Task не может быть пустым");
+            }
             Node<T> node = taskLocation.get(task.getUuid());
-            if (node != null) {
+            if (Objects.nonNull(node)) {
                 taskHistory.removeNode(node);
             }
             Node lastNode = taskHistory.linkLast(task);
@@ -25,7 +30,7 @@ public class InMemoryHistoryManager<T> implements HistoryManager{
     @Override
     public void remove(Integer id) {
         Node<T> node = taskLocation.get(id);
-        if(node != null) {
+        if(Objects.nonNull(node)) {
             taskHistory.removeNode(node);
             taskLocation.remove(id);
         }
