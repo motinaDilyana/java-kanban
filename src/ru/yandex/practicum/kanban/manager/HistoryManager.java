@@ -4,10 +4,10 @@ import ru.yandex.practicum.kanban.task.Task;
 
 import java.util.ArrayList;
 
-public interface HistoryManager {
+public interface HistoryManager<T extends Task> {
     void add(Task obj);
 
     void remove(Integer id);
 
-    ArrayList<Task> getHistory();
+    ArrayList<T> getHistory();
 }
