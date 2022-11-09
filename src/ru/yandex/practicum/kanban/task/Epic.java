@@ -29,11 +29,17 @@ public class Epic extends Task {
         this.subTaskUuids = subTaskUuids;
     }
 
+    public Type getType() {
+        return Type.EPIC;
+    }
+
     @Override
     public String toString() {
         return "Epic{" +
                 "subTaskUuids=" + subTaskUuids +
-                ", uuid=" + getUuid() + ", status=" + getStatus() +
+                "uuid=" + getUuid() +
+                ", status=" + this.getStatus() +
+                ", type=" + this.getType() +
                 '}';
     }
 

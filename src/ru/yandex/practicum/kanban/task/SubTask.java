@@ -18,12 +18,17 @@ public class SubTask extends Task {
         return epicUuid;
     }
 
+    public Type getType() {
+        return Type.SUBTASK;
+    }
+
     @Override
     public String toString() {
         return "SubTask{" +
                 "uuid=" + getUuid() +
                 ", epicUuid=" + epicUuid +
                 ", status=" + this.getStatus() +
+                ", type=" + this.getType() +
                 '}';
     }
 
