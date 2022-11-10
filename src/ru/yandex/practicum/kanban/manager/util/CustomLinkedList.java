@@ -5,9 +5,9 @@ import ru.yandex.practicum.kanban.task.Task;
 import java.util.ArrayList;
 
 public class CustomLinkedList<T> {
-    int size = 0;
-    Node<T> first;
-    Node<T> last;
+    private int size = 0;
+    private Node<T> first;
+    private Node<T> last;
 
 
     public Node<T> linkLast(T element) {
