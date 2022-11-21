@@ -6,6 +6,7 @@ import ru.yandex.practicum.kanban.task.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TreeSet;
 
 public interface TaskManager {
 
@@ -48,4 +49,5 @@ public interface TaskManager {
      void update(Integer uuid, SubTask subTask);
 
      ArrayList<Task> getHistory();
+     TreeSet<Task> getPrioritizedTasks();
 }

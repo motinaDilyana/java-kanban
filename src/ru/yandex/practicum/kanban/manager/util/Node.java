@@ -3,9 +3,9 @@ package ru.yandex.practicum.kanban.manager.util;
 import java.util.Objects;
 
 public class Node<E> {
-    Node<E> prev;
-    Node<E> next;
-    E task;
+    protected Node<E> prev;
+    protected Node<E> next;
+    protected E task;
 
     public Node(E task, Node<E> prev, Node<E> next) {
         this.task = task;

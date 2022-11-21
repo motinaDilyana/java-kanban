@@ -5,7 +5,6 @@ import ru.yandex.practicum.kanban.task.Task;
 import java.util.ArrayList;
 
 public class CustomLinkedList<T> {
-    private int size = 0;
     private Node<T> first;
     private Node<T> last;
 
@@ -18,7 +17,6 @@ public class CustomLinkedList<T> {
             first = newNode;
         else
             l.next = newNode;
-        size++;
 
         return newNode;
     }
@@ -57,7 +55,6 @@ public class CustomLinkedList<T> {
                 }
 
                 x.task = null;
-                size--;
             }
         }
     }

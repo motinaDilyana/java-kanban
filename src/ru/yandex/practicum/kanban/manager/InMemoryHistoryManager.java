@@ -1,6 +1,7 @@
 package ru.yandex.practicum.kanban.manager;
 
 import ru.yandex.practicum.kanban.manager.exceptions.NullTaskException;
+import ru.yandex.practicum.kanban.manager.exceptions.TaskNotFoundException;
 import ru.yandex.practicum.kanban.manager.util.CustomLinkedList;
 import ru.yandex.practicum.kanban.manager.util.Node;
 import ru.yandex.practicum.kanban.task.Task;
@@ -12,6 +13,7 @@ import java.util.Objects;
 
 public class InMemoryHistoryManager<T> implements HistoryManager{
     private final CustomLinkedList<Task> taskHistory = new CustomLinkedList<>();
+
     private final Map<Integer, Node<T>> taskLocation = new HashMap<>();
 
     @Override
@@ -28,7 +30,11 @@ public class InMemoryHistoryManager<T> implements HistoryManager{
     }
 
     @Override
-    public void remove(Integer id) {
+    public void remove(Integer id) throws NullTaskException, TaskNotFoundException {
+        if(Objects.isNull(id)) {
+            throw new NullTaskException("Task не может быть пустым");
+        }
+
         Node<T> node = taskLocation.get(id);
         if(Objects.nonNull(node)) {
             taskHistory.removeNode(node);

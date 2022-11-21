@@ -1,5 +1,6 @@
 package ru.yandex.practicum.kanban.task;
 
+import ru.yandex.practicum.kanban.task.model.TaskDates;
 import java.util.Objects;
 
 public class SubTask extends Task {
@@ -9,8 +10,18 @@ public class SubTask extends Task {
         this.epicUuid = epicUuid;
     }
 
+    public SubTask(String name, String description, Integer epicUuid, TaskDates dates) {
+        super(name, description, dates);
+        this.epicUuid = epicUuid;
+    }
+
     public SubTask(Integer uuid, String name, String description, String status, Integer epicUuid) {
         super(uuid, name, description, status);
+        this.epicUuid = epicUuid;
+    }
+
+    public SubTask(Integer uuid, String name, String description, String status, Integer epicUuid, TaskDates dates) {
+        super(uuid, name, description, status, dates);
         this.epicUuid = epicUuid;
     }
 
@@ -29,6 +40,9 @@ public class SubTask extends Task {
                 ", epicUuid=" + epicUuid +
                 ", status=" + this.getStatus() +
                 ", type=" + this.getType() +
+                ", startTime=" + this.getDates().getStartTime() +
+                ", endTime=" + this.getDates().getEndTime() +
+                ", duration=" + this.getDates().getDuration() +
                 '}';
     }
 
