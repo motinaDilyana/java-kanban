@@ -12,19 +12,15 @@ import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class EpicTest extends TaskManagerTest<InMemoryTaskManager>{
+class EpicTest extends InMemoryTaskManagerTest{
 
-    @BeforeEach
-    void setUp() {
-        manager = new InMemoryTaskManager();
-    }
     @Test
     void shouldReturnEpicWithSubtasksAndNewStatusOnCreateEpicWithCorrectInput() {
-        Epic epic = this.manager.createEpic(new Epic("test1", "testD"));
-        SubTask subtask = this.manager.createSubTask(new SubTask("test1", "testD", epic.getUuid()));
-        SubTask subtask2 = this.manager.createSubTask(new SubTask("test1", "testD", epic.getUuid()));
-        this.manager.update(subtask.getUuid(), new SubTask(subtask.getUuid(), subtask.getName(), subtask.getDescription(), "NEW", epic.getUuid()));
-        this.manager.update(subtask2.getUuid(), new SubTask(subtask2.getUuid(), subtask2.getName(), subtask2.getDescription(), "NEW", epic.getUuid()));
+        Epic epic = manager.createEpic(new Epic("test1", "testD"));
+        SubTask subtask = manager.createSubTask(new SubTask("test1", "testD", epic.getUuid()));
+        SubTask subtask2 = manager.createSubTask(new SubTask("test1", "testD", epic.getUuid()));
+        manager.update(subtask.getUuid(), new SubTask(subtask.getUuid(), subtask.getName(), subtask.getDescription(), "NEW", epic.getUuid()));
+        manager.update(subtask2.getUuid(), new SubTask(subtask2.getUuid(), subtask2.getName(), subtask2.getDescription(), "NEW", epic.getUuid()));
 
         Epic savedEpic = manager.getEpicByUuid(epic.getUuid());
 
@@ -35,11 +31,11 @@ class EpicTest extends TaskManagerTest<InMemoryTaskManager>{
 
     @Test
     void shouldReturnEpicWithSubtasksAndInProgressStatusOnCreateEpicWithCorrectInput() {
-        Epic epic = this.manager.createEpic(new Epic("test1", "testD"));
-        SubTask subtask = this.manager.createSubTask(new SubTask("test1", "testD", epic.getUuid()));
-        SubTask subtask2 = this.manager.createSubTask(new SubTask("test1", "testD", epic.getUuid()));
-        this.manager.update(subtask.getUuid(), new SubTask(subtask.getUuid(), subtask.getName(), subtask.getDescription(), "IN_PROGRESS", epic.getUuid()));
-        this.manager.update(subtask2.getUuid(), new SubTask(subtask2.getUuid(), subtask2.getName(), subtask2.getDescription(), "IN_PROGRESS", epic.getUuid()));
+        Epic epic = manager.createEpic(new Epic("test1", "testD"));
+        SubTask subtask = manager.createSubTask(new SubTask("test1", "testD", epic.getUuid()));
+        SubTask subtask2 = manager.createSubTask(new SubTask("test1", "testD", epic.getUuid()));
+        manager.update(subtask.getUuid(), new SubTask(subtask.getUuid(), subtask.getName(), subtask.getDescription(), "IN_PROGRESS", epic.getUuid()));
+        manager.update(subtask2.getUuid(), new SubTask(subtask2.getUuid(), subtask2.getName(), subtask2.getDescription(), "IN_PROGRESS", epic.getUuid()));
         Epic savedEpic = manager.getEpicByUuid(epic.getUuid());
 
         assertEquals(savedEpic.getStatus(), "IN_PROGRESS");
@@ -52,10 +48,10 @@ class EpicTest extends TaskManagerTest<InMemoryTaskManager>{
 
     @Test
     void shouldReturnEpicWithSubtasksAndInProgressStatusWhenNewAndDoneSubtasksOnCreateEpicWithCorrectInput() {
-        Epic epic = this.manager.createEpic(new Epic("test1", "testD"));
-        SubTask subtask = this.manager.createSubTask(new SubTask("test1", "testD", epic.getUuid()));
-        SubTask subtask2 = this.manager.createSubTask(new SubTask("test1", "testD", epic.getUuid()));
-        this.manager.update(subtask.getUuid(), new SubTask(subtask.getUuid(), subtask.getName(), subtask.getDescription(), "DONE", epic.getUuid()));
+        Epic epic = manager.createEpic(new Epic("test1", "testD"));
+        SubTask subtask = manager.createSubTask(new SubTask("test1", "testD", epic.getUuid()));
+        SubTask subtask2 = manager.createSubTask(new SubTask("test1", "testD", epic.getUuid()));
+        manager.update(subtask.getUuid(), new SubTask(subtask.getUuid(), subtask.getName(), subtask.getDescription(), "DONE", epic.getUuid()));
         Epic savedEpic = manager.getEpicByUuid(epic.getUuid());
 
         assertEquals(savedEpic.getStatus(), "IN_PROGRESS");
@@ -68,11 +64,11 @@ class EpicTest extends TaskManagerTest<InMemoryTaskManager>{
 
     @Test
     void shouldReturnEpicWithSubtasksAndDoneStatusWhenAllSubtasksDoneOnCreateEpicWithCorrectInput() {
-        Epic epic = this.manager.createEpic(new Epic("test1", "testD"));
-        SubTask subtask = this.manager.createSubTask(new SubTask("test1", "testD", epic.getUuid()));
-        SubTask subtask2 = this.manager.createSubTask(new SubTask("test1", "testD", epic.getUuid()));
-        this.manager.update(subtask.getUuid(), new SubTask(subtask.getUuid(), subtask.getName(), subtask.getDescription(), "DONE", epic.getUuid()));
-        this.manager.update(subtask2.getUuid(), new SubTask(subtask2.getUuid(), subtask2.getName(), subtask2.getDescription(), "DONE", epic.getUuid()));
+        Epic epic = manager.createEpic(new Epic("test1", "testD"));
+        SubTask subtask = manager.createSubTask(new SubTask("test1", "testD", epic.getUuid()));
+        SubTask subtask2 = manager.createSubTask(new SubTask("test1", "testD", epic.getUuid()));
+        manager.update(subtask.getUuid(), new SubTask(subtask.getUuid(), subtask.getName(), subtask.getDescription(), "DONE", epic.getUuid()));
+        manager.update(subtask2.getUuid(), new SubTask(subtask2.getUuid(), subtask2.getName(), subtask2.getDescription(), "DONE", epic.getUuid()));
         Epic savedEpic = manager.getEpicByUuid(epic.getUuid());
 
         assertEquals(savedEpic.getStatus(), "DONE");
@@ -86,13 +82,13 @@ class EpicTest extends TaskManagerTest<InMemoryTaskManager>{
         final TaskNotFoundException exceptionNotFount = assertThrows(
                 TaskNotFoundException.class,
                 () -> {
-                    this.manager.getEpicByUuid(1);
+                    manager.getEpicByUuid(1);
                 });
 
         final NullTaskException exceptionNull = assertThrows(
                 NullTaskException.class,
                 () -> {
-                    this.manager.getEpicByUuid(null);
+                    manager.getEpicByUuid(null);
                 });
 
         assertEquals("Epic с uuid 1 не найден", exceptionNotFount.getMessage());
@@ -102,14 +98,14 @@ class EpicTest extends TaskManagerTest<InMemoryTaskManager>{
 
     @Test
     void shouldDeleteEmptyEpicOnDeleteEpicWhenInputIsCorrect() {
-        Epic epic = this.manager.createEpic(new Epic("test1", "testD"));
-        Epic savedEpic = this.manager.getEpicByUuid(epic.getUuid());
+        Epic epic = manager.createEpic(new Epic("test1", "testD"));
+        Epic savedEpic = manager.getEpicByUuid(epic.getUuid());
 
-        Epic epicWithSubtasks = this.manager.createEpic(new Epic("test1", "testD"));
-        SubTask subtask = this.manager.createSubTask(new SubTask("test1", "testD", epicWithSubtasks.getUuid()));
-        Epic savedEpicWithSubtasks = this.manager.getEpicByUuid(epicWithSubtasks.getUuid());
+        Epic epicWithSubtasks = manager.createEpic(new Epic("test1", "testD"));
+        SubTask subtask = manager.createSubTask(new SubTask("test1", "testD", epicWithSubtasks.getUuid()));
+        Epic savedEpicWithSubtasks = manager.getEpicByUuid(epicWithSubtasks.getUuid());
 
-        this.manager.deleteEpic(savedEpic.getUuid());
+        manager.deleteEpic(savedEpic.getUuid());
 
         assertEquals(1, manager.getEpics().size());
         assertEquals(1, manager.getEpicSubtasks(savedEpicWithSubtasks.getUuid()).size());
@@ -117,18 +113,18 @@ class EpicTest extends TaskManagerTest<InMemoryTaskManager>{
         final TaskNotFoundException exceptionNotFount = assertThrows(
                 TaskNotFoundException.class,
                 () -> {
-                    this.manager.getEpicByUuid(savedEpic.getUuid());
+                    manager.getEpicByUuid(savedEpic.getUuid());
                 });
         assertEquals("Epic с uuid " +savedEpic.getUuid() +" не найден", exceptionNotFount.getMessage());
     }
 
     @Test
     void shouldDeleteEpicWithAllSubtasksOnDeleteEpicWhenInputIsCorrect() {
-        Epic epicWithSubtasks = this.manager.createEpic(new Epic("test1", "testD"));
-        SubTask subtask = this.manager.createSubTask(new SubTask("test1", "testD", epicWithSubtasks.getUuid()));
-        Epic savedEpicWithSubtasks = this.manager.getEpicByUuid(epicWithSubtasks.getUuid());
-        SubTask savedSubtask = this.manager.getSubTaskByUuid(subtask.getUuid());
-        this.manager.deleteEpic(epicWithSubtasks.getUuid());
+        Epic epicWithSubtasks = manager.createEpic(new Epic("test1", "testD"));
+        SubTask subtask = manager.createSubTask(new SubTask("test1", "testD", epicWithSubtasks.getUuid()));
+        Epic savedEpicWithSubtasks = manager.getEpicByUuid(epicWithSubtasks.getUuid());
+        SubTask savedSubtask = manager.getSubTaskByUuid(subtask.getUuid());
+        manager.deleteEpic(epicWithSubtasks.getUuid());
 
         assertEquals(0, manager.getEpics().size());
         assertEquals(0, manager.getSubTasks().size());
@@ -136,14 +132,14 @@ class EpicTest extends TaskManagerTest<InMemoryTaskManager>{
         final TaskNotFoundException exceptionEpicNotFount = assertThrows(
                 TaskNotFoundException.class,
                 () -> {
-                    this.manager.getEpicByUuid(savedEpicWithSubtasks.getUuid());
+                    manager.getEpicByUuid(savedEpicWithSubtasks.getUuid());
                 });
         assertEquals("Epic с uuid " +savedEpicWithSubtasks.getUuid() +" не найден", exceptionEpicNotFount.getMessage());
 
         final TaskNotFoundException exceptionSubtasksNotFount = assertThrows(
                 TaskNotFoundException.class,
                 () -> {
-                    this.manager.getSubTaskByUuid(savedSubtask.getUuid());
+                    manager.getSubTaskByUuid(savedSubtask.getUuid());
                 });
         assertEquals("SubTask с uuid: " +savedSubtask.getUuid() +" не существует", exceptionSubtasksNotFount.getMessage());
     }
@@ -154,13 +150,13 @@ class EpicTest extends TaskManagerTest<InMemoryTaskManager>{
         final TaskNotFoundException exceptionNotFount = assertThrows(
                 TaskNotFoundException.class,
                 () -> {
-                    this.manager.deleteEpic(1);
+                    manager.deleteEpic(1);
                 });
 
         final NullTaskException exceptionNull = assertThrows(
                 NullTaskException.class,
                 () -> {
-                    this.manager.deleteEpic(null);
+                    manager.deleteEpic(null);
                 });
 
         assertEquals("Epic с uuid 1 не найден", exceptionNotFount.getMessage());
@@ -169,21 +165,21 @@ class EpicTest extends TaskManagerTest<InMemoryTaskManager>{
 
     @Test
     void shouldDeleteAllEpicsWithAllSubtasksOnDeleteAllEpics() {
-        Epic epicWithSubtasks1 = this.manager.createEpic(new Epic("test1", "testD"));
-        this.manager.createSubTask(new SubTask("test1", "testD", epicWithSubtasks1.getUuid()));
-        this.manager.createSubTask(new SubTask("test1", "testD", epicWithSubtasks1.getUuid()));
-        this.manager.createSubTask(new SubTask("test1", "testD", epicWithSubtasks1.getUuid()));
+        Epic epicWithSubtasks1 = manager.createEpic(new Epic("test1", "testD"));
+        manager.createSubTask(new SubTask("test1", "testD", epicWithSubtasks1.getUuid()));
+        manager.createSubTask(new SubTask("test1", "testD", epicWithSubtasks1.getUuid()));
+        manager.createSubTask(new SubTask("test1", "testD", epicWithSubtasks1.getUuid()));
 
-        Epic epicWithSubtasks2 = this.manager.createEpic(new Epic("test1", "testD"));
-        this.manager.createSubTask(new SubTask("test1", "testD", epicWithSubtasks2.getUuid()));
-        this.manager.createSubTask(new SubTask("test1", "testD", epicWithSubtasks2.getUuid()));
-        this.manager.createSubTask(new SubTask("test1", "testD", epicWithSubtasks2.getUuid()));
+        Epic epicWithSubtasks2 = manager.createEpic(new Epic("test1", "testD"));
+        manager.createSubTask(new SubTask("test1", "testD", epicWithSubtasks2.getUuid()));
+        manager.createSubTask(new SubTask("test1", "testD", epicWithSubtasks2.getUuid()));
+        manager.createSubTask(new SubTask("test1", "testD", epicWithSubtasks2.getUuid()));
 
 
-        Epic savedEpicWithSubtasks = this.manager.getEpicByUuid(epicWithSubtasks1.getUuid());
-        Epic savedEpicWithSubtasks1 = this.manager.getEpicByUuid(epicWithSubtasks2.getUuid());
-        this.manager.deleteEpic(savedEpicWithSubtasks.getUuid());
-        this.manager.deleteEpic(savedEpicWithSubtasks1.getUuid());
+        Epic savedEpicWithSubtasks = manager.getEpicByUuid(epicWithSubtasks1.getUuid());
+        Epic savedEpicWithSubtasks1 = manager.getEpicByUuid(epicWithSubtasks2.getUuid());
+        manager.deleteEpic(savedEpicWithSubtasks.getUuid());
+        manager.deleteEpic(savedEpicWithSubtasks1.getUuid());
 
 
         assertEquals(0, manager.getEpics().size());
@@ -192,7 +188,7 @@ class EpicTest extends TaskManagerTest<InMemoryTaskManager>{
         final TaskNotFoundException exceptionNotFount = assertThrows(
                 TaskNotFoundException.class,
                 () -> {
-                    this.manager.getEpicByUuid(savedEpicWithSubtasks.getUuid());
+                    manager.getEpicByUuid(savedEpicWithSubtasks.getUuid());
                 });
         assertEquals("Epic с uuid " + savedEpicWithSubtasks.getUuid() + " не найден", exceptionNotFount.getMessage());
 
@@ -200,14 +196,14 @@ class EpicTest extends TaskManagerTest<InMemoryTaskManager>{
 
     @Test
     void shouldReturnAllEpicsOnGetEpics() {
-        Epic epicWithoutSubtask = this.manager.createEpic(new Epic("test1", "testD"));
-        Epic epicWithoutSubtask2 = this.manager.createEpic(new Epic("test1", "testD"));
-        Epic epicWithSubtasks = this.manager.createEpic(new Epic("test1", "testD"));
-        this.manager.createSubTask(new SubTask("test1", "testD", epicWithSubtasks.getUuid()));
-        this.manager.createSubTask(new SubTask("test1", "testD", epicWithSubtasks.getUuid()));
-        this.manager.createSubTask(new SubTask("test1", "testD", epicWithSubtasks.getUuid()));
-        Epic savedEpicWithSubtasks = this.manager.getEpicByUuid(epicWithSubtasks.getUuid());
-        HashMap<Integer, Epic> epics = this.manager.getEpics();
+        Epic epicWithoutSubtask = manager.createEpic(new Epic("test1", "testD"));
+        Epic epicWithoutSubtask2 = manager.createEpic(new Epic("test1", "testD"));
+        Epic epicWithSubtasks = manager.createEpic(new Epic("test1", "testD"));
+        manager.createSubTask(new SubTask("test1", "testD", epicWithSubtasks.getUuid()));
+        manager.createSubTask(new SubTask("test1", "testD", epicWithSubtasks.getUuid()));
+        manager.createSubTask(new SubTask("test1", "testD", epicWithSubtasks.getUuid()));
+        Epic savedEpicWithSubtasks = manager.getEpicByUuid(epicWithSubtasks.getUuid());
+        HashMap<Integer, Epic> epics = manager.getEpics();
 
         assertEquals(3, epics.size());
         assertNotNull(epics);
@@ -218,11 +214,11 @@ class EpicTest extends TaskManagerTest<InMemoryTaskManager>{
 
     @Test
     void shouldReturnUpdatedEpicOnUpdateWhenInputIsCorrect() {
-        Epic epicWithoutSubtask = this.manager.createEpic(new Epic("test1", "testD"));
-        this.manager.update(epicWithoutSubtask.getUuid(),
+        Epic epicWithoutSubtask = manager.createEpic(new Epic("test1", "testD"));
+        manager.update(epicWithoutSubtask.getUuid(),
                 new Epic(epicWithoutSubtask.getUuid(), "testNew", "descriptionNew", epicWithoutSubtask.getStatus()));
 
-        Epic updatedEpic = this.manager.getEpicByUuid(epicWithoutSubtask.getUuid());
+        Epic updatedEpic = manager.getEpicByUuid(epicWithoutSubtask.getUuid());
 
         assertNotNull(updatedEpic);
         assertEquals(updatedEpic.getName(), "testNew");
@@ -232,22 +228,46 @@ class EpicTest extends TaskManagerTest<InMemoryTaskManager>{
 
     @Test
     void shouldReturnExceptionOnUpdateEpicWhenInputUuidIncorrect() {
-        Epic epicWithoutSubtask = this.manager.createEpic(new Epic("test1", "testD"));
+        Epic epicWithoutSubtask = manager.createEpic(new Epic("test1", "testD"));
 
         final TaskNotFoundException exceptionNotFount = assertThrows(
                 TaskNotFoundException.class,
                 () -> {
-                    this.manager.update(1, epicWithoutSubtask);
+                    manager.update(1, epicWithoutSubtask);
                 });
 
         final NullTaskException exceptionNull = assertThrows(
                 NullTaskException.class,
                 () -> {
-                    this.manager.update(null, epicWithoutSubtask);
+                    manager.update(null, epicWithoutSubtask);
                 });
 
         assertEquals("Epic с uuid 1 не найден", exceptionNotFount.getMessage());
         assertEquals("Некорректные данные", exceptionNull.getMessage());
     }
 
+    @Test
+    void shouldReturnEpicWithoutSubtasksAndNewStatusOnCreateEpicWhenInputIsCorrect() {
+        Epic epic = this.manager.createEpic(new Epic("test1", "testD"));
+        Epic savedEpic = this.manager.getEpicByUuid(epic.getUuid());
+
+        assertNotNull(savedEpic);
+        assertEquals(epic, savedEpic);
+        assertEquals(1, manager.getEpics().size());
+        assertEquals(epic, manager.getEpics().get(0));
+        assertEquals(0, savedEpic.getSubTaskUuids().size());
+        assertEquals("NEW", savedEpic.getStatus());
+    }
+
+    @Test
+    void shouldReturnExceptionOnCreateEpicWhenInputNull() {
+        final NullTaskException exception = assertThrows(
+                NullTaskException.class,
+                () -> {
+                    this.manager.createEpic(null);
+                });
+
+        assertEquals("Epic не может быть пустым.", exception.getMessage());
+        assertEquals(0, manager.getEpics().size());
+    }
 }
