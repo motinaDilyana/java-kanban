@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class InMemoryHistoryManager<T> implements HistoryManager{
-    private static final CustomLinkedList<Task> taskHistory = new CustomLinkedList<>();
+    private final CustomLinkedList<Task> taskHistory = new CustomLinkedList<>();
 
     private final Map<Integer, Node<T>> taskLocation = new HashMap<>();
 

@@ -71,7 +71,6 @@ class TaskTest extends InMemoryTaskManagerTest{
 
         assertEquals("Task с uuid 1 не найден", exceptionNotFount.getMessage());
         assertEquals("Некорректный ID", exceptionNull.getMessage());
-        assertEquals(0, manager.getHistory().size());
     }
 
     @Test
