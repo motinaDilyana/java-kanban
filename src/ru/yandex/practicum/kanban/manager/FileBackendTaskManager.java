@@ -14,7 +14,7 @@ import static java.lang.Integer.parseInt;
 
 public class FileBackendTaskManager extends InMemoryTaskManager {
 
-    public static final String SEPARATOR = ",";
+    private static final String SEPARATOR = ",";
     private final File file;
 
     public FileBackendTaskManager(File file) {
@@ -43,7 +43,7 @@ public class FileBackendTaskManager extends InMemoryTaskManager {
         }
     }
 
-    public FileBackendTaskManager loadFromFile(File file) {
+    public static FileBackendTaskManager loadFromFile(File file) {
         final FileBackendTaskManager manager = new FileBackendTaskManager(file);
         //Начинаем чтение строк из файлв
         try (BufferedReader reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
@@ -53,11 +53,11 @@ public class FileBackendTaskManager extends InMemoryTaskManager {
                 //если строка пустая - идем на следующую и пытаемся прочитать историю просмотров
                 if (line.isBlank()) {
                     line = reader.readLine();
-                    historyFromString(line);
+                    manager.historyFromString(line);
                     break;
                 } else {
                     //иначе создаем задачи из строки
-                    fromString(line);
+                    manager.fromString(line);
                 }
             }
         } catch (IOException e) {

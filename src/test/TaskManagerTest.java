@@ -106,7 +106,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         assertEquals("Task с uuid 1 не найден", exceptionNotFount.getMessage());
         assertEquals("Некорректный ID", exceptionNull.getMessage());
-        assertEquals(0, manager.getHistory().size());
     }
 
     @Test
@@ -221,7 +220,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertNotNull(savedSubTask);
         assertEquals(subTask, savedSubTask);
         assertEquals(subTask, manager.getSubTasks().get(0));
-        assertEquals(1, manager.getHistory().size());
     }
 
     @Test
@@ -240,7 +238,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         assertEquals("SubTask с uuid: 1 не существует", exceptionNotFount.getMessage());
         assertEquals("Некорректный ID", exceptionNull.getMessage());
-        assertEquals(0, manager.getHistory().size());
     }
 
     @Test
@@ -345,20 +342,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals("SubTask с uuid 99 не найден", exceptionNotFount.getMessage());
         assertEquals("Некорректные данные", exceptionNull.getMessage());
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     @Test
     void shouldReturnEpicWithoutSubtasksAndNewStatusOnCreateEpicWhenInputIsCorrect() {
