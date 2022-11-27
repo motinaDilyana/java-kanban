@@ -20,8 +20,11 @@ public class FileBackendTaskManager extends InMemoryTaskManager {
     public FileBackendTaskManager(File file) {
         this.file = file;
     }
+    public FileBackendTaskManager() {
+        this.file = new File("");
+    }
 
-    private void save() {
+    protected void save() {
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(this.file))) {
             //Формируем шапку файлв
             bufferedWriter.write("id,type,name,status,description,startTime,EndTime,Duration,epic");

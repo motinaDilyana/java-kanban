@@ -1,18 +1,18 @@
 package ru.yandex.practicum.kanban.main;
+import ru.yandex.practicum.kanban.manager.HTTPTaskManager;
+import ru.yandex.practicum.kanban.manager.Managers;
+import ru.yandex.practicum.kanban.manager.TaskManager;
 import ru.yandex.practicum.kanban.manager.exceptions.NullTaskException;
 import ru.yandex.practicum.kanban.manager.exceptions.TaskNotFoundException;
+import ru.yandex.practicum.kanban.server.HttpTaskServer;
+
+import java.io.IOException;
 
 public class Main {
 
-    public static void main(String[] args) {
-        try {
-            printTestCases();
-        } catch (NullTaskException | TaskNotFoundException e) {
-            System.out.println("Ошибка: " + e.getMessage());
-        }
-    }
-
-    private static void printTestCases() {
-
+    public static void main(String[] args) throws IOException {
+        TaskManager httpTaskManager = Managers.getDefault();
+        HttpTaskServer httpTaskServer = new HttpTaskServer(httpTaskManager);
+        httpTaskServer.startHttpServer();
     }
 }

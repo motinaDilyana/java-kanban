@@ -1,7 +1,6 @@
 package test;
 
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.kanban.manager.InMemoryHistoryManager;
 import ru.yandex.practicum.kanban.manager.exceptions.NullTaskException;
 import ru.yandex.practicum.kanban.manager.exceptions.TaskNotFoundException;
 import ru.yandex.practicum.kanban.task.Epic;

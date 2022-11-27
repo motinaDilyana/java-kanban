@@ -1,8 +1,9 @@
 package ru.yandex.practicum.kanban.task;
 
+import lombok.Builder;
 import ru.yandex.practicum.kanban.task.model.TaskDates;
 import java.util.Objects;
-
+@Builder
 public class Task {
     private Integer uuid;
     private String name;
