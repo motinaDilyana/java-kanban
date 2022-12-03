@@ -5,20 +5,31 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import ru.yandex.practicum.kanban.manager.Managers;
 import ru.yandex.practicum.kanban.manager.TaskManager;
+import ru.yandex.practicum.kanban.server.exceptions.ResponseException;
 import ru.yandex.practicum.kanban.task.Epic;
 import ru.yandex.practicum.kanban.task.SubTask;
 import ru.yandex.practicum.kanban.task.Task;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 public class HttpTaskServer {
     private static final int PORT = 8080;
     private final TaskManager manager;
     private final HttpServer server;
+    private static final int SERVER_DELAY = 120;
+    private static final int RESPONSE_LENGTH = 0;
+
+    private static final int URL_PREFIX_POSITION = 2;
+    private static final int URL_PREFIX_TASKS_LIST_POSITION = 1;
     private final Gson gson;
 
     public HttpTaskServer(TaskManager manager) throws IOException {
@@ -37,85 +48,81 @@ public class HttpTaskServer {
     }
 
     public void stopHttpServer() {
-        server.stop(120);
+        server.stop(SERVER_DELAY);
     }
 
-    private void methodMapper(HttpExchange httpExchange) throws IOException {
+    private void methodMapper(HttpExchange httpExchange) throws ResponseException {
+        String path = httpExchange.getRequestURI().getPath();
+        String[] url = path.split("/");
+        String urlType;
+        if(url.length == 3) {
+            urlType = path.split("/")[URL_PREFIX_POSITION];
+        } else {
+            urlType = path.split("/")[URL_PREFIX_TASKS_LIST_POSITION];
+        }
+
+        String query = httpExchange.getRequestURI().getQuery();
+
+        Integer id = null;
         try {
+            if (Objects.nonNull(query)) {
+                id = parseId(httpExchange);
+            }
+
+            InputStream inputStream = httpExchange.getRequestBody();
+            String inputBody = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+
             switch (httpExchange.getRequestMethod()) {
                 case "GET":
-                    getTasks(httpExchange);
+                    getTasks(httpExchange, urlType, id);
                     break;
                 case "POST":
-                    createTask(httpExchange);
+                    createTask(httpExchange, urlType, inputBody);
                     break;
                 case "DELETE":
-                    deleteTask(httpExchange);
+                    deleteTask(httpExchange, urlType, id);
                     break;
                 case "PUT":
-                    updateTasks(httpExchange);
+                    updateTasks(httpExchange, urlType, inputBody);
                     break;
                 default:
-                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, 0);
+                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, RESPONSE_LENGTH);
             }
+        } catch (IOException e) {
+            throw new ResponseException("Could not handle request");
         } finally {
             httpExchange.close();
         }
+
     }
 
-    private void getTasks(HttpExchange httpExchange) throws IOException {
+    private <T extends Task> void getTasks(HttpExchange httpExchange, String url, Integer id) throws IOException {
         try {
-            String path = httpExchange.getRequestURI().getPath();
-            String[] split = path.split("/");
-
-            if (split.length == 2) {
-                getAllTasks(split[1], httpExchange);
+            Collection optional;
+            if (Objects.isNull(id)) {
+                getAllTasks(url, httpExchange);
             } else {
-                String query = split[2];
-
-                switch (query) {
+                switch (url) {
                     case "task":
-                        try {
-                            Optional<Task> optional = Optional.ofNullable(manager.getTaskByUuid(parseId(httpExchange)));
-                            find(optional, httpExchange);
-                        } finally {
-                            httpExchange.close();
-                        }
+                        optional = Collections.singletonList(manager.getTaskByUuid(id));
+                        sendResponse(optional, httpExchange);
+                        httpExchange.close();
                         break;
                     case "epic":
-                        try {
-                            int id = parseId(httpExchange);
-
-                            Optional<Epic> optional = Optional.ofNullable(manager.getEpicByUuid(id));
-                            find(optional, httpExchange);
-                        } finally {
-                            httpExchange.close();
-                        }
+                        optional = Collections.singletonList(manager.getEpicByUuid(id));
+                        sendResponse(optional, httpExchange);
+                        httpExchange.close();
                         break;
                     case "subtask":
-                        try {
-                            int id = parseId(httpExchange);
-
-                            Optional<SubTask> optional = Optional.ofNullable(manager.getSubTaskByUuid(id));
-                            find(optional, httpExchange);
-                        } finally {
-                            httpExchange.close();
-                        }
+                        optional = Collections.singletonList(manager.getSubTaskByUuid(id));
+                        sendResponse(optional, httpExchange);
+                        httpExchange.close();
                         break;
                     case "history":
-                        try {
-                            ArrayList<Task> history = manager.getHistory();
-
-                            httpExchange.sendResponseHeaders(200, 0);
-                            try (OutputStream os = httpExchange.getResponseBody()) {
-                                os.write(history.toString().getBytes());
-                            }
-                        } finally {
-                            httpExchange.close();
-                        }
+                        optional = Collections.singletonList(manager.getHistory());
+                        sendResponse(optional, httpExchange);
+                        httpExchange.close();
                         break;
-                    default:
-                        httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
                 }
             }
         } finally {
@@ -123,215 +130,134 @@ public class HttpTaskServer {
         }
     }
 
-    private void getAllTasks(String query, HttpExchange httpExchange) throws IOException {
-        switch (query) {
-            case "tasks":
-                try {
+    private void getAllTasks(String query, HttpExchange httpExchange) {
+        try {
+            switch (query) {
+                case "tasks":
                     List<Task> tasks = manager.getTasks();
-
-                    httpExchange.sendResponseHeaders(200, 0);
-                    try (OutputStream os = httpExchange.getResponseBody()) {
-                        for (var task : tasks) {
-                            os.write(gson.toJson(task).getBytes());
-                        }
-                    }
-                } finally {
+                    sendResponse(tasks, httpExchange);
                     httpExchange.close();
-                }
-                break;
-            case "epics":
-                try {
+                    break;
+                case "epics":
                     Collection<Epic> epics = manager.getEpics().values();
-
-                    httpExchange.sendResponseHeaders(200, 0);
-                    try (OutputStream os = httpExchange.getResponseBody()) {
-                        for (var epic : epics) {
-                            os.write(gson.toJson(epic).getBytes());
-                        }
-                    }
-                } finally {
+                    sendResponse(epics, httpExchange);
                     httpExchange.close();
-                }
-                break;
-            case "subtasks":
-                try {
+                    break;
+                case "subtasks":
                     Collection<SubTask> subtasks = manager.getSubTasks();
-
-                    httpExchange.sendResponseHeaders(200, 0);
-                    try (OutputStream os = httpExchange.getResponseBody()) {
-                        for (var sub : subtasks) {
-                            os.write(gson.toJson(sub).getBytes());
-                        }
-                    }
-                } finally {
+                    sendResponse(subtasks, httpExchange);
                     httpExchange.close();
+                    break;
+                default:
+                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, RESPONSE_LENGTH);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Could not send response from get all tasks");
+        } finally {
+            httpExchange.close();
+        }
+    }
+
+    private void createTask(HttpExchange httpExchange, String query, String inputBody) throws IOException {
+        try {
+            switch (query) {
+                case "task":
+                    Task task = gson.fromJson(inputBody, Task.class);
+                    manager.createTask(task);
+                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
+                    httpExchange.close();
+                    break;
+                case "epic":
+                    Epic epic = gson.fromJson(inputBody, Epic.class);
+                    manager.createEpic(epic);
+                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
+                    httpExchange.close();
+                    break;
+                case "subtask":
+                    SubTask subtask = gson.fromJson(inputBody, SubTask.class);
+                    manager.createSubTask(subtask);
+                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
+                    httpExchange.close();
+                    break;
+                default:
+                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, RESPONSE_LENGTH);
+            }
+        } finally {
+            httpExchange.close();
+        }
+    }
+
+    private void updateTasks(HttpExchange httpExchange, String query, String inputBody) throws IOException {
+        try {
+            switch (query) {
+                case "task":
+                    Task task = gson.fromJson(inputBody, Task.class);
+                    manager.update(task.getUuid(), task);
+                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
+                    break;
+                case "epic":
+                    Epic epic = gson.fromJson(inputBody, Epic.class);
+                    manager.update(epic.getUuid(), epic);
+                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
+                    break;
+                case "subtask":
+                    SubTask subtask = gson.fromJson(inputBody, SubTask.class);
+                    manager.update(subtask.getUuid(), subtask);
+                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
+                    break;
+                default:
+                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, RESPONSE_LENGTH);
+            }
+        } finally {
+            httpExchange.close();
+        }
+    }
+
+    private void deleteTask(HttpExchange httpExchange, String query, int id) throws IOException {
+        try {
+            switch (query) {
+                case "task":
+                    manager.deleteTask(id);
+                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
+                    break;
+                case "epic":
+                    manager.deleteEpic(id);
+                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
+                    break;
+                case "subtask":
+                    manager.deleteSubTask(id, 0);
+                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
+                    break;
+                default:
+                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, RESPONSE_LENGTH);
+            }
+        } finally {
+            httpExchange.close();
+        }
+    }
+
+    private <T extends Task> void sendResponse(Collection<T> optional, HttpExchange httpExchange) throws IOException {
+
+            if (!optional.isEmpty()) {
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, RESPONSE_LENGTH);
+                try (OutputStream os = httpExchange.getResponseBody()) {
+                    for (T value : optional) {
+                        os.write(gson.toJson(value).getBytes());
+                    }
                 }
-                break;
-            default:
-                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
-        }
-    }
-
-    private void createTask(HttpExchange httpExchange) throws IOException {
-        try {
-            String path = httpExchange.getRequestURI().getPath();
-            String query = path.split("/")[2];
-
-            InputStream inputStream = httpExchange.getRequestBody();
-            String inputBody = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-
-            switch (query) {
-                case "task":
-                    try {
-                        Task task = gson.fromJson(inputBody, Task.class);
-                        manager.createTask(task);
-
-                        httpExchange.sendResponseHeaders(200, 0);
-                    } finally {
-                        httpExchange.close();
-                    }
-                    break;
-                case "epic":
-                    try {
-                        Epic epic = gson.fromJson(inputBody, Epic.class);
-                        manager.createEpic(epic);
-
-                        httpExchange.sendResponseHeaders(200, 0);
-                    } finally {
-                        httpExchange.close();
-                    }
-                    break;
-                case "subtask":
-                    try {
-                        SubTask subtask = gson.fromJson(inputBody, SubTask.class);
-                        manager.createSubTask(subtask);
-
-                        httpExchange.sendResponseHeaders(200, 0);
-                    } finally {
-                        httpExchange.close();
-                    }
-                    break;
-                default:
-                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
+            } else {
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, RESPONSE_LENGTH);
             }
-        } finally {
-            httpExchange.close();
-        }
-    }
-
-    private void updateTasks(HttpExchange httpExchange) throws IOException {
-        try {
-            String path = httpExchange.getRequestURI().getPath();
-            String query = path.split("/")[2];
-
-            InputStream inputStream = httpExchange.getRequestBody();
-            String inputBody = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-
-            switch (query) {
-                case "task":
-                    try {
-                        Task task = gson.fromJson(inputBody, Task.class);
-                        manager.update(task.getUuid(), task);
-
-                        httpExchange.sendResponseHeaders(200, 0);
-                    } finally {
-                        httpExchange.close();
-                    }
-                    break;
-                case "epic":
-                    try {
-                        Epic epic = gson.fromJson(inputBody, Epic.class);
-                        manager.update(epic.getUuid(), epic);
-
-                        httpExchange.sendResponseHeaders(200, 0);
-                    } finally {
-                        httpExchange.close();
-                    }
-                    break;
-                case "subtask":
-                    try {
-                        SubTask subtask = gson.fromJson(inputBody, SubTask.class);
-                        manager.update(subtask.getUuid(), subtask);
-
-                        httpExchange.sendResponseHeaders(200, 0);
-                    } finally {
-                        httpExchange.close();
-                    }
-                    break;
-                default:
-                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
-            }
-        } finally {
-            httpExchange.close();
-        }
-    }
-
-    private void deleteTask(HttpExchange httpExchange) throws IOException {
-        try {
-            String path = httpExchange.getRequestURI().getPath();
-            String query = path.split("/")[2];
-
-            switch (query) {
-                case "task":
-                    try {
-                        int id = parseId(httpExchange);
-                        manager.deleteTask(id);
-
-                        httpExchange.sendResponseHeaders(200, 0);
-                    } finally {
-                        httpExchange.close();
-                    }
-                    break;
-                case "epic":
-                    try {
-                        int id = parseId(httpExchange);
-                        manager.deleteEpic(id);
-
-                        httpExchange.sendResponseHeaders(200, 0);
-                    } finally {
-                        httpExchange.close();
-                    }
-                    break;
-                case "subtask":
-                    try {
-                        int id = parseId(httpExchange);
-                        manager.deleteSubTask(id, 0);
-
-                        httpExchange.sendResponseHeaders(200, 0);
-                    } finally {
-                        httpExchange.close();
-                    }
-                    break;
-                default:
-                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
-            }
-        } finally {
-            httpExchange.close();
-        }
-    }
-
-    private void find(Optional optional, HttpExchange httpExchange) throws IOException {
-        if (optional.isPresent()) {
-            httpExchange.sendResponseHeaders(200, 0);
-            try (OutputStream os = httpExchange.getResponseBody()) {
-                os.write(gson.toJson(optional.get()).getBytes());
-            }
-        } else {
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, 0);
-        }
     }
 
     private int parseId(HttpExchange httpExchange) throws IOException {
         int id = -1;
-        try {
-            id = Integer.parseInt(
-                    httpExchange
-                            .getRequestURI()
-                            .getRawQuery()
-                            .substring("id=".length()));
-        } catch (NumberFormatException formatException) {
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
-        }
+        id = Integer.parseInt(
+                httpExchange
+                        .getRequestURI()
+                        .getRawQuery()
+                        .substring("id=".length()));
+
         return id;
     }
 }
